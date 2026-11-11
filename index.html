@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merry Christmas!!! - merry_xmas.exe</title>
+<meta name="description" content="You've received a Christmas card. It has elves. They cannot dance.">
+<meta property="og:title" content="You've got a Christmas card from Cameron">
+<meta property="og:description" content="A wild ELF appeared! Open to receive holiday cheer.">
+<meta name="theme-color" content="#000080">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><rect x='7' y='0' width='2' height='2' fill='%23fff'/><path d='M6 2h4v2h1v2h1v2h1v2H3V8h1V6h1V4h1z' fill='%23d02020'/><rect x='3' y='10' width='10' height='2' fill='%23fff'/><rect x='4' y='12' width='8' height='4' fill='%23f0be96'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#d62828; --green:#2a9d3a; --gold:#ffd23f; --navy:#000080;
+    --gray:#c0c0c0; --dark:#808080; --px:"Press Start 2P", "Courier New", monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    min-height:100vh; font-family:var(--px); color:#fff;
+    background-color:#0b0b2a;
+    background-image:
+      radial-gradient(1px 1px at 10px 14px,#fff 99%,transparent),
+      radial-gradient(1px 1px at 40px 70px,#ffd23f 99%,transparent),
+      radial-gradient(1px 1px at 80px 30px,#fff 99%,transparent),
+      radial-gradient(1px 1px at 110px 95px,#9ff 99%,transparent);
+    background-size:128px 128px;
+    display:flex; flex-direction:column; align-items:center;
+    padding:18px 10px 40px; image-rendering:pixelated;
+  }
+  h1{
+    font-size:clamp(18px,5.2vw,42px); line-height:1.35; margin:10px 0 18px; text-align:center;
+    letter-spacing:2px;
+  }
+  h1 span{display:inline-block; animation:hop 1s steps(2) infinite; text-shadow:3px 3px 0 #000, 6px 6px 0 rgba(255,255,255,.15)}
+  h1 span:nth-child(odd){color:var(--red)}
+  h1 span:nth-child(even){color:var(--green)}
+  h1 span:nth-child(3n){color:var(--gold)}
+  @keyframes hop{50%{transform:translateY(-4px)}}
+
+  /* ---- fake win95 window ---- */
+  .win{
+    width:min(720px,100%); background:var(--gray); color:#000;
+    border:2px solid; border-color:#fff #404040 #404040 #fff;
+    box-shadow:1px 1px 0 #000, 8px 8px 0 rgba(0,0,0,.5);
+  }
+  .titlebar{
+    background:linear-gradient(90deg,var(--navy),#1084d0); color:#fff;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:4px 4px 4px 8px; font-size:10px;
+  }
+  .titlebar .ctl{display:flex; gap:3px}
+  .titlebar button{
+    width:20px; height:18px; padding:0; font:inherit; font-size:9px; cursor:pointer;
+    background:var(--gray); border:2px solid; border-color:#fff #404040 #404040 #fff;
+  }
+  .titlebar button:active{border-color:#404040 #fff #fff #404040}
+  .body{padding:10px}
+  .stage{
+    position:relative; border:2px solid; border-color:#404040 #fff #fff #404040; background:#000;
+  }
+  canvas{display:block; width:100%; height:auto; image-rendering:pixelated; image-rendering:crisp-edges; cursor:pointer}
+  .hud{
+    position:absolute; left:6px; top:6px; font-size:8px; color:#0f0; text-shadow:1px 1px 0 #000;
+    pointer-events:none; line-height:1.6;
+  }
+  .hud.right{left:auto; right:6px; text-align:right; color:var(--gold)}
+
+  /* ---- RPG dialogue ---- */
+  .dialog{
+    position:relative; margin-top:10px; background:#101060; color:#fff; min-height:96px;
+    border:4px solid #fff; outline:3px solid #101060; outline-offset:-8px;
+    padding:16px 18px 22px; font-size:clamp(9px,2.2vw,13px); line-height:1.9; cursor:pointer;
+    user-select:none;
+  }
+  .dialog .who{color:var(--gold); display:block; margin-bottom:4px}
+  .dialog .next{position:absolute; right:12px; bottom:8px; animation:blink .8s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  .btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+  .btn{
+    flex:1 1 140px; font:inherit; font-size:10px; padding:10px 8px; cursor:pointer; color:#000;
+    background:var(--gray); border:2px solid; border-color:#fff #404040 #404040 #fff;
+    box-shadow:inset -1px -1px 0 var(--dark);
+  }
+  .btn:active{border-color:#404040 #fff #fff #404040; box-shadow:inset 1px 1px 0 var(--dark)}
+  .btn:focus-visible{outline:2px dotted #000; outline-offset:-6px}
+
+  .status{
+    display:flex; gap:4px; padding:0 10px 8px; font-size:8px;
+  }
+  .status div{flex:1; padding:4px 6px; border:2px solid; border-color:#808080 #fff #fff #808080; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+  .marquee{
+    width:min(720px,100%); overflow:hidden; margin-top:18px; background:#000; border:2px dashed var(--gold);
+    font-size:10px; color:var(--gold); padding:8px 0; white-space:nowrap;
+  }
+  .marquee span{display:inline-block; padding-left:100%; animation:scroll 22s linear infinite}
+  @keyframes scroll{to{transform:translateX(-100%)}}
+
+  footer{margin-top:22px; font-size:8px; line-height:2.2; text-align:center; color:#aab}
+  .counter{display:inline-block; background:#000; color:#f33; border:2px inset #666; padding:2px 6px; letter-spacing:3px}
+  footer a{color:#9ff}
+
+  .toast{
+    position:fixed; left:50%; top:30%; transform:translate(-50%,-50%); z-index:9;
+    background:var(--gray); color:#000; font-size:10px; width:min(320px,90vw);
+    border:2px solid; border-color:#fff #404040 #404040 #fff; box-shadow:6px 6px 0 rgba(0,0,0,.6); display:none;
+  }
+  .toast .titlebar{font-size:9px}
+  .toast p{padding:14px; margin:0; line-height:1.9}
+  .toast .btn{display:block; margin:0 auto 12px; flex:none; width:90px}
+  @media (prefers-reduced-motion: reduce){ h1 span,.marquee span{animation:none} .marquee span{padding-left:10px} }
+</style>
+</head>
+<body>
+
+<h1 id="title" aria-label="Merry Christmas"></h1>
+
+<div class="win" role="main">
+  <div class="titlebar">
+    <span>merry_xmas.exe</span>
+    <div class="ctl">
+      <button data-joke="min" aria-label="Minimize">_</button>
+      <button data-joke="max" aria-label="Maximize">&#9633;</button>
+      <button data-joke="close" aria-label="Close">x</button>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="stage">
+      <canvas id="c" width="240" height="160" aria-label="Low-poly elf dancing badly"></canvas>
+      <div class="hud" id="hud">FPS: 12 (CINEMATIC)<br>POLYS: 0</div>
+      <div class="hud right" id="move">MOVE: SNEAKY SNEAK</div>
+    </div>
+
+    <div class="dialog" id="dialog" role="button" tabindex="0" aria-live="polite">
+      <span class="who">ELF:</span><span id="text"></span><span class="next">&#9660;</span>
+    </div>
+
+    <div class="btns">
+      <button class="btn" id="bMove">NEW MOVE</button>
+      <button class="btn" id="bElf">+ ELF</button>
+      <button class="btn" id="bMusic" aria-pressed="false">MUSIC: OFF</button>
+    </div>
+  </div>
+
+  <div class="status">
+    <div id="sElves">ELVES: 1</div>
+    <div>CHEER: 100%</div>
+    <div>RAM: 640K (ENOUGH)</div>
+  </div>
+</div>
+
+<div class="marquee" aria-hidden="true"><span>
+  *** WELCOME TO MY CHRISTMAS CARD *** NOW WITH 3D GRAPHICS *** THE ELF HAS BEEN DANCING SINCE 1997 AND HE WILL NOT STOP *** CLICK THE ELF *** EAT A COOKIE *** HAPPY HOLIDAYS FROM CBB ***
+</span></div>
+
+<footer>
+  YOU ARE VISITOR <span class="counter">000001</span> (EVERYONE IS VISITOR #1)<br>
+  BEST VIEWED IN NETSCAPE NAVIGATOR 4.0 AT 800x600<br>
+  &copy; 1997&ndash;2026 <a href="https://cbbdev.com">CBB</a> &middot; NO ELVES WERE HARMED
+</footer>
+
+<div class="toast" id="toast" role="alertdialog" aria-labelledby="toastMsg">
+  <div class="titlebar"><span>System Message</span></div>
+  <p id="toastMsg"></p>
+  <button class="btn" id="toastOk">OK</button>
+</div>
+
+<script>
+/* =========================================================
+   EDIT ME: card text. Use {name} where the recipient's name goes.
+   Personalize per person with a link like: merry.cbbdev.com/?to=Grandma
+   ========================================================= */
+const CONFIG = {
+  from: "Cameron",
+  defaultName: "friend",
+  lines: [
+    "A wild ELF appeared!",
+    "ELF used HOLIDAY CHEER. It's super effective!",
+    "Hey {name}! Merry Christmas from {from}.",
+    "Hope your 2026 wrapped up nicely and your 2027 loads faster than this website.",
+    "Eat too many cookies. Call your people. Dance badly, like me.",
+    "Happy holidays! <3  -{from}",
+    "[THE END]  ...or press + ELF. You know you want to."
+  ]
+};
+
+/* ---------- personalization ---------- */
+const params = new URLSearchParams(location.search);
+const rawName = (params.get("to") || "").replace(/[^\p{L}\p{N} .'&-]/gu, "").trim().slice(0, 30);
+const NAME = rawName || CONFIG.defaultName;
+if (rawName) document.title = `Merry Christmas, ${rawName}!!! - merry_xmas.exe`;
+
+/* ---------- title letters ---------- */
+(() => {
+  const h = document.getElementById("title");
+  const txt = rawName ? `MERRY XMAS, ${rawName.toUpperCase()}!` : "MERRY CHRISTMAS!";
+  [...txt].forEach((ch, i) => {
+    const s = document.createElement("span");
+    s.textContent = ch === " " ? " " : ch;
+    s.style.animationDelay = (i * 0.07) + "s";
+    s.setAttribute("aria-hidden", "true");
+    h.appendChild(s);
+  });
+})();
+
+/* ---------- toast (fake system dialogs) ---------- */
+const toast = document.getElementById("toast");
+function say(msg){ document.getElementById("toastMsg").textContent = msg; toast.style.display = "block"; document.getElementById("toastOk").focus(); }
+document.getElementById("toastOk").onclick = () => toast.style.display = "none";
+const jokes = {
+  min: "Christmas cannot be minimized.",
+  max: "Christmas is already at maximum capacity.",
+  close: "Nice try. The elf has disabled the close button."
+};
+document.querySelectorAll("[data-joke]").forEach(b => b.onclick = () => say(jokes[b.dataset.joke]));
+
+/* =========================================================
+   TINY SOFTWARE 3D RENDERER (flat shaded, painter's algorithm)
+   ========================================================= */
+const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+const W = cv.width, H = cv.height;
+
+const M = {
+  mul(a,b){const r=new Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[i*4+k]*b[k*4+j];r[i*4+j]=s}return r},
+  t:(x,y,z)=>[1,0,0,x, 0,1,0,y, 0,0,1,z, 0,0,0,1],
+  rx(a){const c=Math.cos(a),s=Math.sin(a);return[1,0,0,0, 0,c,-s,0, 0,s,c,0, 0,0,0,1]},
+  ry(a){const c=Math.cos(a),s=Math.sin(a);return[c,0,s,0, 0,1,0,0, -s,0,c,0, 0,0,0,1]},
+  rz(a){const c=Math.cos(a),s=Math.sin(a);return[c,-s,0,0, s,c,0,0, 0,0,1,0, 0,0,0,1]},
+  ap(m,v){return[m[0]*v[0]+m[1]*v[1]+m[2]*v[2]+m[3], m[4]*v[0]+m[5]*v[1]+m[6]*v[2]+m[7], m[8]*v[0]+m[9]*v[1]+m[10]*v[2]+m[11]]}
+};
+const chain = (...ms) => ms.reduce((a,b)=>M.mul(a,b));
+
+// mesh: {v:[[x,y,z]], f:[[i...]], c:[cx,cy,cz]}
+const meshCache = {};
+function box(w,h,d,ox=0,oy=0,oz=0){
+  const k=`b${w},${h},${d},${ox},${oy},${oz}`; if(meshCache[k]) return meshCache[k];
+  const v=[]; for(let i=0;i<8;i++) v.push([ox+(i&1?w/2:-w/2), oy+(i&2?h/2:-h/2), oz+(i&4?d/2:-d/2)]);
+  return meshCache[k]={v, f:[[0,2,6,4],[1,3,7,5],[0,1,5,4],[2,3,7,6],[0,1,3,2],[4,5,7,6]], c:[ox,oy,oz]};
+}
+function cone(r,h,n){
+  const k=`c${r},${h},${n}`; if(meshCache[k]) return meshCache[k];
+  const v=[]; for(let i=0;i<n;i++){const a=i/n*Math.PI*2; v.push([Math.cos(a)*r,0,Math.sin(a)*r])}
+  v.push([0,h,0]); const f=[];
+  for(let i=0;i<n;i++) f.push([i,(i+1)%n,n]);
+  f.push([...Array(n).keys()]);
+  return meshCache[k]={v,f,c:[0,h/3,0]};
+}
+
+const LIGHT = (()=>{const l=[0.45,0.8,0.55],m=Math.hypot(...l);return l.map(x=>x/m)})();
+let polys = [], VIEW, FOCAL = H*1.25;
+
+function project(p){ // view-space -> screen
+  const d = -p[2]; return [W/2 + FOCAL*p[0]/d, H*0.58 - FOCAL*p[1]/d, d];
+}
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+
+function draw(mesh, model, col){
+  const wv = mesh.v.map(p=>M.ap(model,p));
+  const wc = M.ap(model, mesh.c);
+  for(const f of mesh.f){
+    const a=wv[f[0]], b=wv[f[1]], c=wv[f[2]];
+    let n = cross(sub(b,a), sub(c,a));
+    const fc = f.reduce((s,i)=>[s[0]+wv[i][0]/f.length, s[1]+wv[i][1]/f.length, s[2]+wv[i][2]/f.length],[0,0,0]);
+    if(dot(n, sub(fc,wc)) < 0) n = n.map(x=>-x);
+    const nl = Math.hypot(...n) || 1; n = n.map(x=>x/nl);
+    const vv = f.map(i=>M.ap(VIEW, wv[i]));
+    const vfc = M.ap(VIEW, fc), vn = sub(M.ap(VIEW, [fc[0]+n[0],fc[1]+n[1],fc[2]+n[2]]), vfc);
+    if(dot(vn, vfc) >= 0) continue;                // backface
+    if(vv.some(p=>p[2] > -0.2)) continue;          // behind camera
+    let lit = 0.38 + 0.62*Math.max(0, dot(n, LIGHT));
+    lit = Math.round(lit*5)/5;                     // banding = retro
+    polys.push({pts: vv.map(project), z: -vfc[2], col: col.map(x=>Math.min(255, x*lit|0))});
+  }
+}
+function flush(){
+  polys.sort((a,b)=>b.z-a.z);
+  for(const p of polys){
+    ctx.fillStyle = `rgb(${p.col})`;
+    ctx.beginPath(); p.pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 0.6; ctx.stroke(); // seal seams
+  }
+  const n = polys.length; polys = []; return n;
+}
+
+/* ---------- the elf ---------- */
+const C = {
+  green:[46,170,70], dgreen:[25,110,45], skin:[245,195,155], red:[220,40,40], white:[245,245,245],
+  black:[25,20,30], gold:[255,210,60], brown:[120,65,25], pink:[240,120,130]
+};
+function elf(root, P){
+  // legs (candy stripes)
+  for(const s of [1,-1]){
+    const hip = chain(root, M.t(s*0.18, 0.92, 0), M.rx(s>0?P.lLeg:P.rLeg));
+    for(let i=0;i<3;i++) draw(box(0.24,0.28,0.26, 0,-0.14-i*0.28,0), hip, i%2?C.white:C.red);
+    draw(box(0.3,0.16,0.46, 0,-0.9,0.1), hip, C.brown);
+    const toe = chain(hip, M.t(0,-0.86,0.33), M.rx(Math.PI/2.4));
+    draw(cone(0.11,0.3,4), toe, C.brown);
+    draw(box(0.09,0.09,0.09, 0,0.32,0), toe, C.gold);
+  }
+  // torso
+  const torso = chain(root, M.t(0,0.9,0), M.rx(P.tRx), M.rz(P.tRz));
+  draw(box(0.72,0.82,0.46, 0,0.41,0), torso, C.green);
+  draw(box(0.76,0.12,0.5, 0,0.12,0), torso, C.black);
+  draw(box(0.16,0.14,0.06, 0,0.12,0.26), torso, C.gold);
+  draw(box(0.8,0.1,0.52, 0,0.8,0), torso, C.white);
+  // head
+  const head = chain(torso, M.t(0,0.84,0), M.ry(P.hRy), M.rz(P.hRz));
+  draw(box(0.56,0.56,0.5, 0,0.3,0), head, C.skin);
+  for(const s of [1,-1]){
+    draw(box(0.09,0.11,0.04, s*0.13,0.36,0.26), head, C.black);
+    draw(cone(0.1,0.34,4), chain(head, M.t(s*0.28,0.32,0), M.rz(-s*1.25)), C.skin);
+  }
+  draw(box(0.12,0.12,0.1, 0,0.25,0.29), head, C.pink);
+  draw(box(0.24,0.05,0.04, 0,0.12,0.26), head, C.red);
+  // hat
+  draw(box(0.64,0.12,0.58, 0,0.6,0), head, C.white);
+  const hat = chain(head, M.t(0,0.64,0), M.rz(-0.35 + P.hat));
+  draw(cone(0.32,0.85,6), hat, C.red);
+  draw(box(0.18,0.18,0.18, 0,0.86,0), hat, C.white);
+  // arms
+  for(const s of [1,-1]){
+    const sh = chain(torso, M.t(s*0.47,0.72,0), M.rx(s>0?P.lArmX:P.rArmX), M.rz(s*(s>0?P.lArmZ:P.rArmZ)));
+    draw(box(0.2,0.62,0.2, 0,-0.3,0), sh, C.dgreen);
+    draw(box(0.2,0.18,0.2, 0,-0.68,0), sh, C.skin);
+    if(s<0){ // candy cane in right hand
+      const cane = chain(sh, M.t(0,-0.68,0.06));
+      for(let i=0;i<6;i++) draw(box(0.09,0.09,0.13, 0,0,0.06+i*0.13), cane, i%2?C.white:C.red);
+      [[0,0.1,0.8],[0,0.2,0.76],[0,0.25,0.66],[0,0.2,0.57]].forEach((p,i)=>draw(box(0.09,0.09,0.09,...p), cane, i%2?C.red:C.white));
+    }
+  }
+}
+
+/* ---------- dance moves (all poses are joint angles in radians) ---------- */
+const S = Math.sin, Co = Math.cos, A = Math.abs;
+const MOVES = [
+  ["SNEAKY SNEAK", (t)=>{const p=t*5; return {
+    x:S(t*1.3)*0.9, y:-0.12+A(S(p))*0.12, ry:Co(t*1.3)*0.9, tRx:0.4, tRz:0,
+    hRy:S(t*1.9)*0.9, hRz:0, hat:S(p)*0.15,
+    lLeg:-Math.max(0,S(p))*1.3, rLeg:-Math.max(0,-S(p))*1.3,
+    lArmX:-0.9-S(p)*0.5, lArmZ:0.2, rArmX:-1.25+S(p)*0.25, rArmZ:0.1 }}],
+  ["HAPPY DANCE", (t)=>{const p=t*7; return {
+    x:0, y:A(S(p))*0.45, ry:t*2.2, tRx:0, tRz:S(p)*0.15,
+    hRy:0, hRz:S(p)*0.35, hat:S(p+1)*0.4,
+    lLeg:S(p)*0.7, rLeg:-S(p)*0.7,
+    lArmX:0, lArmZ:2.5+S(p*2)*0.5, rArmX:0, rArmZ:2.5+S(p*2+1)*0.5 }}],
+  ["THE WINDMILL", (t)=>{const p=t*6; return {
+    x:0, y:A(S(p))*0.15, ry:S(t)*0.6, tRx:0.1, tRz:S(p/2)*0.25,
+    hRy:S(p)*0.4, hRz:0, hat:S(p)*0.3,
+    lLeg:S(p)*0.3, rLeg:-S(p)*0.3,
+    lArmX:-p*1.4, lArmZ:0.3, rArmX:-p*1.4+Math.PI, rArmZ:0.3 }}],
+  ["T-POSE (DOMINANCE)", (t)=>({
+    x:0, y:S(t*40)*0.015, ry:t*0.7, tRx:0, tRz:0,
+    hRy:0, hRz:0, hat:0, lLeg:0, rLeg:0,
+    lArmX:0, lArmZ:Math.PI/2, rArmX:0, rArmZ:Math.PI/2 })],
+  ["THE WORM?? (BROKEN)", (t)=>{const p=t*5; return {
+    x:S(t*0.8)*0.6, y:-0.55+A(S(p))*0.3, ry:Math.PI/2, tRx:1.3+S(p)*0.4, tRz:0,
+    hRy:0, hRz:S(p*2)*0.2, hat:S(p)*0.5,
+    lLeg:0.6+S(p+1)*0.6, rLeg:0.6+S(p+1)*0.6,
+    lArmX:-2.6+S(p)*0.4, lArmZ:0.2, rArmX:-2.6+S(p)*0.4, rArmZ:0.2 }}],
+];
+let moveIdx = 0;
+const elves = [{x:0,z:0,ph:0}];
+const MAX_ELVES = 15;
+
+/* ---------- scene ---------- */
+const snow = Array.from({length:70},()=>({x:Math.random()*W, y:Math.random()*H, v:6+Math.random()*14}));
+const stars = Array.from({length:40},()=>[Math.random()*W|0, Math.random()*H*0.5|0]);
+function background(){
+  const bands = ["#14082e","#1d0d45","#27135c","#321a72","#3d2289"];
+  const bh = Math.ceil(H*0.62/bands.length);
+  bands.forEach((c,i)=>{ctx.fillStyle=c; ctx.fillRect(0,i*bh,W,bh+1)});
+  ctx.fillStyle="#fff"; stars.forEach(([x,y],i)=>{ if((i+frame)%23) ctx.fillRect(x,y,1,1) });
+  ctx.fillStyle="#fff4b0"; ctx.beginPath(); ctx.arc(W-30,22,8,0,7); ctx.fill();          // pixel moon
+  ctx.fillStyle="#1d0d45"; ctx.beginPath(); ctx.arc(W-26,19,7,0,7); ctx.fill();
+}
+function floor(){
+  for(let gz=-9; gz<5; gz++) for(let gx=-8; gx<8; gx++){
+    const q=[[gx,0,gz],[gx+1,0,gz],[gx+1,0,gz+1],[gx,0,gz+1]].map(p=>M.ap(VIEW,p));
+    if(q.some(p=>p[2]>-0.2)) continue;
+    polys.push({pts:q.map(project), z:-(q[0][2]+q[2][2])/2, col:(gx+gz)&1?[235,240,255]:[150,170,220]});
+  }
+  flush();
+}
+function shadow(x,z){
+  const pts=[]; for(let i=0;i<8;i++){const a=i/8*Math.PI*2; pts.push(project(M.ap(VIEW,[x+Math.cos(a)*0.5,0.01,z+Math.sin(a)*0.35])))}
+  ctx.fillStyle="rgba(20,20,60,.45)"; ctx.beginPath(); pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.fill();
+}
+
+let frame = 0, last = 0, t0 = performance.now();
+const hud = document.getElementById("hud"), moveLbl = document.getElementById("move");
+const FPS = 12; // choppy on purpose
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function render(now){
+  requestAnimationFrame(render);
+  if(now - last < 1000/FPS) return; last = now; frame++;
+  const t = reduced ? 1.2 : (now - t0)/1000;
+  const n = elves.length;
+  const camZ = 5.2 + Math.sqrt(n)*1.1, camY = 1.7 + Math.sqrt(n)*0.25;
+  VIEW = chain(M.rx(0.16), M.t(0,-camY,-camZ), M.ry(S(t*0.35)*0.35));
+
+  background(); floor();
+  const pose = MOVES[moveIdx][1];
+  const amp = n > 1 ? 0.5 : 1;
+  for(const e of elves){ const P = pose(t + e.ph); shadow(e.x + P.x*amp, e.z); }
+  for(const e of elves){
+    const P = pose(t + e.ph);
+    elf(chain(M.t(e.x + P.x*amp, P.y, e.z), M.ry(P.ry)), P);
+  }
+  const count = polys.length; flush();
+
+  ctx.fillStyle = "#fff";
+  for(const f of snow){ f.y += f.v/FPS; f.x += S(f.y*0.1)*0.3; if(f.y>H){f.y=-2; f.x=Math.random()*W} ctx.fillRect(f.x|0, f.y|0, 1, 1) }
+
+  hud.innerHTML = `FPS: ${FPS} (CINEMATIC)<br>POLYS: ${count}`;
+}
+requestAnimationFrame(render);
+
+/* ---------- controls ---------- */
+const sElves = document.getElementById("sElves");
+function nextMove(){ moveIdx = (moveIdx+1) % MOVES.length; moveLbl.textContent = "MOVE: " + MOVES[moveIdx][0]; blip(660); }
+function addElf(){
+  if(elves.length >= MAX_ELVES){ say(`ELF LIMIT REACHED (${MAX_ELVES}). The North Pole union has been notified.`); return; }
+  const i = elves.length, ring = Math.ceil(i/2), side = i%2 ? 1 : -1;
+  elves.push({x: side*ring*1.25, z: -ring*0.9, ph: Math.random()*3});
+  sElves.textContent = "ELVES: " + elves.length; blip(880);
+}
+document.getElementById("bMove").onclick = nextMove;
+document.getElementById("bElf").onclick = addElf;
+cv.onclick = nextMove;
+
+/* ---------- dialogue ---------- */
+const lines = CONFIG.lines.map(l => l.replaceAll("{name}", NAME).replaceAll("{from}", CONFIG.from));
+const textEl = document.getElementById("text"), dlg = document.getElementById("dialog");
+let li = 0, ci = 0, typer = null;
+function typeLine(){
+  clearInterval(typer); ci = 0; textEl.textContent = "";
+  typer = setInterval(()=>{ ci++; textEl.textContent = lines[li].slice(0,ci); if(ci % 2) blip(1200, 0.015); if(ci >= lines[li].length) clearInterval(typer); }, 32);
+}
+function advance(){
+  if(ci < lines[li].length){ clearInterval(typer); ci = lines[li].length; textEl.textContent = lines[li]; return; }
+  li = (li+1) % lines.length; typeLine();
+}
+dlg.onclick = advance;
+dlg.onkeydown = e => { if(e.key==="Enter"||e.key===" "){ e.preventDefault(); advance(); } };
+document.addEventListener("keydown", e => {
+  if(e.target !== document.body) return;
+  if(e.key==="e"||e.key==="E") addElf();
+  if(e.key==="m"||e.key==="M") nextMove();
+});
+typeLine();
+
+/* ---------- chiptune Jingle Bells (public domain, 1857) ---------- */
+let actx = null, loopTimer = null;
+const NOTE = {C3:130.81,D3:146.83,F3:174.61,G3:196,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440};
+const MEL = ("E4 1 E4 1 E4 2 E4 1 E4 1 E4 2 E4 1 G4 1 C4 1.5 D4 .5 E4 4 F4 1 F4 1 F4 1.5 F4 .5 F4 1 E4 1 E4 1 E4 .5 E4 .5 " +
+             "E4 1 D4 1 D4 1 E4 1 D4 2 G4 2 E4 1 E4 1 E4 2 E4 1 E4 1 E4 2 E4 1 G4 1 C4 1.5 D4 .5 E4 4 " +
+             "F4 1 F4 1 F4 1.5 F4 .5 F4 1 E4 1 E4 1 E4 .5 E4 .5 G4 1 G4 1 F4 1 D4 1 C4 4").split(" ");
+const BASS = "C3 C3 C3 C3 F3 C3 D3 G3 C3 C3 C3 C3 F3 C3 G3 C3".split(" ");
+const BEAT = 0.27;
+function tone(f, start, dur, type="square", vol=0.06){
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(vol, start); g.gain.exponentialRampToValueAtTime(0.0008, start + Math.max(dur*0.95, 0.05));
+  o.connect(g).connect(actx.destination); o.start(start); o.stop(start + dur);
+}
+function scheduleLoop(){
+  const start = actx.currentTime + 0.1; let tt = start;
+  for(let i=0;i<MEL.length;i+=2){ const d = parseFloat(MEL[i+1])*BEAT; tone(NOTE[MEL[i]], tt, d*0.9); tt += d; }
+  BASS.forEach((n,i)=>{ tone(NOTE[n], start+i*4*BEAT, BEAT*1.6, "triangle", 0.12); tone(NOTE[n]*1.5, start+(i*4+2)*BEAT, BEAT*1.6, "triangle", 0.09); });
+  loopTimer = setTimeout(scheduleLoop, (tt - actx.currentTime - 0.05)*1000);
+}
+function blip(f, len=0.05){ if(!actx) return; tone(f, actx.currentTime, len, "square", 0.03); }
+const bMusic = document.getElementById("bMusic");
+bMusic.onclick = () => {
+  if(actx){ clearTimeout(loopTimer); actx.close(); actx = null; bMusic.textContent = "MUSIC: OFF"; bMusic.setAttribute("aria-pressed","false"); return; }
+  actx = new (window.AudioContext||window.webkitAudioContext)(); scheduleLoop();
+  bMusic.textContent = "MUSIC: ON"; bMusic.setAttribute("aria-pressed","true");
+};
+</script>
+</body>
+</html>
